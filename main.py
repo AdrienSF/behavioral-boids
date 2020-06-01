@@ -7,7 +7,7 @@ window = pyglet.window.Window()
 # arrow_image = pyglet.image.load('arrow.png')
 # create boids
 boids = []
-for i in range(30):
+for i in range(10):
     boids.append(Boid())
 
 # create points
