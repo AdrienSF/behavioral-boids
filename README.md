@@ -19,4 +19,5 @@ In this branch, each boid imitates the acceleration vector of the boids around i
 -noticed distinct fractale-like empty circles when frame by frame with 100 boids
  Installation
  Usage
+Project status
  -->
