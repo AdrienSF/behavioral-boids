@@ -7,7 +7,7 @@ window = pyglet.window.Window()
 # arrow_image = pyglet.image.load('arrow.png')
 # create boids
 boids = []
-for i in range(10):
+for i in range(50):
     boids.append(Boid())
 
 # create points
@@ -26,7 +26,7 @@ def move_boids(dt):
         # This shouldn't be computationally very difficult.. except it is!?
         # for t in range(100):
         boids[i].move(dt)
-        boids[i].set_new_velocity(boids)
+        boids[i].set_new_acceleration(boids)
         # set points to be at the same position as the boid objects
         vertex_list[i].vertices = list(boids[i].position)
     # print('moved all boids')
