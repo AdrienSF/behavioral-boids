@@ -1,4 +1,4 @@
-# behavioral-boids
+# behavioral boids
 The boids algorithm manages to simulate flocking behavior by making each boid follow only a few simple rules:
 - Match the position of other boids
 - Match the velocity of other boids
