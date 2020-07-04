@@ -6,7 +6,7 @@ window = pyglet.window.Window()
 
 # create boids
 boids = []
-for i in range(50):
+for i in range(1):
     boids.append(Boid())
 
 # create points
@@ -21,7 +21,7 @@ for point_boid in boids:
 def move_boids(dt):
     for i in range(len(boids)):
         boids[i].move(dt)
-        boids[i].set_new_acceleration(boids)
+        boids[i].set_new_velocity(boids)
         # set points to be at the same position as the boid objects
         vertex_list[i].vertices = list(boids[i].position)
 

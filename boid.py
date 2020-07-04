@@ -1,42 +1,62 @@
 import numpy as np
+from collections import deque 
 
 class Boid():
     def __init__(self):
         self.view_range = 50
         self.collision_range = 20
-        self.speed_cap = 50
+        self.speed_cap = 10000
+        self.expiration_age = 5
+        self.past_saving_interval = 1
 
-        # set 0 velocity
-        self.velocity = np.array([0, 0])
+        # set random velocity
+        self.velocity = np.array([np.random.uniform(-80, 80), np.random.uniform(-80, 80)])
         # set random position
         self.position = np.array([np.random.uniform(0, 640), np.random.uniform(0, 480)])
-        # and random acceleration
-        self.acceleration = np.array([np.random.uniform(-10, 10), np.random.uniform(-10, 10)])
+        # create dict of past positions and velocities
+        self.past = deque([ {'age': 0, 'pos': self.position, 'vel': self.velocity} ])
 
         self.match_position_factor = 1
-        self.match_velocity_factor = 0
-        self.match_acceleration_factor = 1
-        self.collision_factor = 20
+        self.match_velocity_factor = 1
+        self.collision_factor = 1
 
 
     def move(self, dt):
-        # acceleration adds to velocity, velocity adds to position
-        self.velocity = np.array(self.velocity) + np.array(self.acceleration) * dt
+        # velocity adds to position
         self.position = np.array(self.position) + np.array(self.velocity) * dt
 
+        # remove expired past info.
+        # oldest past info is furthest to the left, so we keep removing leftmost info until we reach non-expired items.
+        # FIFO queues should be efficient with collections.deque
+        while self.past[0]['age'] >= self.expiration_age:
+            self.past.popleft()
 
-    def set_new_acceleration(self, flock: list):
+        # if enough time has passed since the last past info has been saved, save present info
+        if self.past[-1]['age'] >= self.past_saving_interval:
+            current_info = {'age': 0, 'pos': self.position, 'vel': self.velocity}
+            self.past.append(current_info)
+            print('past: ' + str(len(list(self.past))))
+
+        # add to all items' age
+        for i in range(len(self.past)):
+            self.past[i]['age'] += dt
+
+
+
+    def set_new_velocity(self, flock: list):
         in_view = [ boid for boid in flock if np.linalg.norm(np.array(boid.position) - np.array(self.position)) < self.view_range and boid != self ]
 
-        # calculat new acceleration only if other boids are in view
+        # calculat new velocity only if other boids/past boids are in view
+        new_velocity = self.velocity
         if in_view:
-            new_accelerattion = np.array(self.acceleration) + self.avoid_collision(in_view) + self.match_position(in_view) + self.match_acceleration(in_view)        
-            self.acceleration = new_accelerattion
+            new_velocity += self.match_position(in_view) + self.match_velocity(in_view)        
+            
+        self.velocity = new_velocity + self.avoid_collision(in_view)
 
         # make sure boid is within speed limit, if exeeded, reset acceleration to random
-        if np.linalg.norm(self.velocity) > self.speed_cap:
-            self.velocity = self.speed_cap * self.velocity / np.linalg.norm(self.velocity)
-            self.acceleration = np.array([np.random.uniform(-10, 10), np.random.uniform(-10, 10)])
+        # if np.linalg.norm(self.velocity) > self.speed_cap:
+            # self.velocity = self.speed_cap * self.velocity / np.linalg.norm(self.velocity)
+            # self.acceleration = np.array([np.random.uniform(-10, 10), np.random.uniform(-10, 10)])
 
 
     def avoid_collision(self, flock: list):
@@ -72,7 +92,3 @@ class Boid():
     def match_velocity(self, flock: list):
         towards_direction = np.mean([ boid.velocity for boid in flock ], axis=0) - np.array(self.velocity)
         return self.match_velocity_factor * towards_direction
-
-    def match_acceleration(self, flock: list):
-        towards_direction = np.mean([ boid.acceleration for boid in flock ], axis=0) - np.array(self.acceleration)
-        return self.match_acceleration_factor * towards_direction
