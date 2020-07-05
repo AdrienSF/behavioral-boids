@@ -6,7 +6,7 @@ window = pyglet.window.Window()
 
 # create boids
 boids = []
-for i in range(1):
+for i in range(10):
     boids.append(Boid())
 
 # create points

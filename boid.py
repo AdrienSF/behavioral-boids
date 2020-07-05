@@ -1,12 +1,34 @@
 import numpy as np
 from collections import deque 
 
+# https://stackoverflow.com/questions/2827393/angles-between-two-n-dimensional-vectors-in-python/13849249#13849249
+def unit_vector(vector):
+    """ Returns the unit vector of the vector.  """
+    return vector / np.linalg.norm(vector)
+
+def angle_between(v1, v2):
+    """ Returns the angle in radians between vectors 'v1' and 'v2'::
+
+            >>> angle_between((1, 0, 0), (0, 1, 0))
+            1.5707963267948966
+            >>> angle_between((1, 0, 0), (1, 0, 0))
+            0.0
+            >>> angle_between((1, 0, 0), (-1, 0, 0))
+            3.141592653589793
+    """
+    v1_u = unit_vector(v1)
+    v2_u = unit_vector(v2)
+    return np.arccos(np.clip(np.dot(v1_u, v2_u), -1.0, 1.0))
+# ---------------------------------------------------------------------------------------------------------------
+
+
 class Boid():
     def __init__(self):
-        self.view_range = 50
-        self.collision_range = 20
+        self.view_range = 20
+        self.field_of_view = np.pi
+        self.collision_range = 10
         self.speed_cap = 10000
-        self.expiration_age = 5
+        self.expiration_age = 50
         self.past_saving_interval = 1
 
         # set random velocity
@@ -16,9 +38,9 @@ class Boid():
         # create dict of past positions and velocities
         self.past = deque([ {'age': 0, 'pos': self.position, 'vel': self.velocity} ])
 
-        self.match_position_factor = 1
-        self.match_velocity_factor = 1
-        self.collision_factor = 1
+        self.match_position_factor = 1/80
+        self.match_velocity_factor = 1/20
+        self.collision_factor = 4
 
 
     def move(self, dt):
@@ -35,7 +57,7 @@ class Boid():
         if self.past[-1]['age'] >= self.past_saving_interval:
             current_info = {'age': 0, 'pos': self.position, 'vel': self.velocity}
             self.past.append(current_info)
-            print('past: ' + str(len(list(self.past))))
+            # print('past: ' + str(len(list(self.past))))
 
         # add to all items' age
         for i in range(len(self.past)):
@@ -45,11 +67,19 @@ class Boid():
 
     def set_new_velocity(self, flock: list):
         in_view = [ boid for boid in flock if np.linalg.norm(np.array(boid.position) - np.array(self.position)) < self.view_range and boid != self ]
+    
+        past_in_view = []
+        for boid in flock:
+            # if boid != self:
+            for past_info in boid.past:
+                if (np.linalg.norm(past_info['pos'] - self.position) < self.view_range and 
+                    abs(angle_between(self.velocity, past_info['pos'] - self.position)) < self.field_of_view/2): 
+                    past_in_view.append(past_info)
 
         # calculat new velocity only if other boids/past boids are in view
         new_velocity = self.velocity
-        if in_view:
-            new_velocity += self.match_position(in_view) + self.match_velocity(in_view)        
+        if past_in_view:
+            new_velocity += self.match_position(past_in_view) + self.match_velocity(past_in_view)        
             
         self.velocity = new_velocity + self.avoid_collision(in_view)
 
@@ -85,10 +115,10 @@ class Boid():
             avoid_obs = avoid_obs / np.linalg.norm(avoid_obs)
         return self.collision_factor * avoid_obs
 
-    def match_position(self, flock: list):
-        towards_center = np.mean([ boid.position for boid in flock ],  axis=0) - np.array(self.position)
+    def match_position(self, past_flock: list):
+        towards_center = np.mean([ boid['pos'] for boid in past_flock ],  axis=0) - np.array(self.position)
         return self.match_position_factor * towards_center
 
-    def match_velocity(self, flock: list):
-        towards_direction = np.mean([ boid.velocity for boid in flock ], axis=0) - np.array(self.velocity)
+    def match_velocity(self, past_flock: list):
+        towards_direction = np.mean([ boid['vel'] for boid in past_flock ], axis=0) - np.array(self.velocity)
         return self.match_velocity_factor * towards_direction
