@@ -11,7 +11,7 @@ class Boid():
         # set random position
         self.position = np.array([np.random.uniform(0, 640), np.random.uniform(0, 480)])
 
-        self.immitation_factors = {'A': 1, 'B': 1, 'C': 1}
+        self.immitation_factors = {'A': .1, 'B': .1, 'C': .1}
         # set random movement function
         A = np.array([np.random.uniform(-1, 1), np.random.uniform(-1, 1)])
         B = np.array([np.random.uniform(-1, 1), np.random.uniform(-1, 1)])

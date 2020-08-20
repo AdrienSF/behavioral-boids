@@ -1,13 +1,21 @@
 import pyglet
 from boid import Boid
+import numpy as np
 
 window = pyglet.window.Window()
 
 
 # create boids
 boids = []
-for i in range(10):
+for i in range(30):
     boids.append(Boid())
+
+# test: give all boids the same movement function
+    # A = np.array([np.random.uniform(-1, 1), np.random.uniform(-1, 1)])
+    # B = np.array([np.random.uniform(-1, 1), np.random.uniform(-1, 1)])
+    # C = np.array([np.random.uniform(-1, 1), np.random.uniform(-1, 1)])
+    # for i in range(len(boids)):
+    #     boids[i].movement_func_coefs = {'A': A, 'B': B, 'C': C}
 
 # create points
 batch = pyglet.graphics.Batch()
