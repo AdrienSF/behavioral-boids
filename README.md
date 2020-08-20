@@ -2,7 +2,7 @@
 The boids algorithm manages to simulate flocking behavior by making each boid follow only a few simple rules:
 - Match the position of other boids
 - Match the velocity of other boids
-- avoid colliding with other boids
+- Avoid colliding with other boids
  
 Matching the position and velocity of other boids is in a sense imitating the behavior of boids around it. In this project I try to extend this concept of imitating behavior: what happens if boids try to match acceleration instead of velocity? what if boids imitate the reaction other boids have in relation to their surroundings? There are many properties of a boid that can be imitated.
  
