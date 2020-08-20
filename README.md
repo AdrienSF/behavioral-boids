@@ -2,12 +2,12 @@
 In the boids algorithm, each boid's velocity is a function of their current velocity, the mean velocity of the boids around it, and the mean position of the boids around it. The boids algorithm uses a specific function to produce flocking behaviour, but what if each boid starts with a random function? In this branch, each boid copies this function from the boids around it, adding it to its own.
  
 Every boid starts with a random function of this form:<br>
-new_velocity = self.velocity + A*flock.velocity + B*flock.relative_position + C
+new_velocity = self.velocity + A × flock.velocity + B × flock.relative_position + C
  
 Where A, B and C are vector constants randomly generated on creation of each boid.
  
 Each boid imitates the movement function of the boids around it in the following manner:<br>
-new_func = old_func + weight * flock_func
+new_func = old_func + weight × flock_func
  
 This abstraction of the boids algorithm leads to interesting results: no matter what random functions the boids start with, they always seem to eventually display some form of organized behavior despite the fact that no such behavior has been explicitly coded. I've identified a few types of organized behavior that boids seem to tend towards:
  
